@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase-browser";
 
-type Mode = "sign_in" | "sign_up";
+type Mode = "sign_in" | "sign_up" | "forgot";
 
 export function LoginForm() {
   const router = useRouter();
@@ -28,6 +28,28 @@ export function LoginForm() {
     setLoading(true);
 
     try {
+      if (mode === "forgot") {
+        const base = appUrl?.replace(/\/$/, "") ?? "";
+        if (!base) {
+          setMessage(
+            "Password reset is not configured (NEXT_PUBLIC_APP_URL missing).",
+          );
+          return;
+        }
+        const redirectTo = `${base}/auth/callback?next=${encodeURIComponent("/auth/update-password")}`;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo,
+        });
+        if (error) {
+          setMessage(error.message);
+          return;
+        }
+        setMessage(
+          "Check your email for a reset link. Open it on this device; the link expires after a while.",
+        );
+        return;
+      }
+
       if (mode === "sign_in") {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -81,7 +103,11 @@ export function LoginForm() {
           Paper<span className="text-[var(--yellow)]">Pay</span>
         </h1>
         <p className="mt-1 font-mono-data text-[11px] uppercase tracking-widest text-[var(--muted)]">
-          {mode === "sign_in" ? "Sign in" : "Create account"}
+          {mode === "sign_in"
+            ? "Sign in"
+            : mode === "sign_up"
+              ? "Create account"
+              : "Reset password"}
         </p>
       </div>
 
@@ -156,28 +182,51 @@ export function LoginForm() {
             placeholder="you@example.com"
           />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="password"
-            className="font-mono-data text-[10px] font-medium uppercase tracking-widest text-[var(--muted)]"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete={
-              mode === "sign_in" ? "current-password" : "new-password"
-            }
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="rounded-[var(--r-sm)] border border-[var(--border)] bg-[var(--bg)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--dim)] focus:border-[var(--yellow-border)]"
-            placeholder="••••••••"
-          />
-        </div>
+        {mode === "sign_in" && (
+          <div className="-mt-1 flex justify-end">
+            <button
+              type="button"
+              className="font-mono-data text-[10px] font-medium uppercase tracking-wide text-[var(--muted)] underline decoration-[var(--border2)] underline-offset-2 hover:text-[var(--yellow)]"
+              onClick={() => {
+                setMode("forgot");
+                setMessage(null);
+              }}
+            >
+              Forgot password?
+            </button>
+          </div>
+        )}
+        {mode === "forgot" && (
+          <p className="text-[11px] leading-relaxed text-[var(--muted)]">
+            Enter the email for your account. We will send a link to set a new
+            password (check spam). The link opens this site so you can choose a
+            new password.
+          </p>
+        )}
+        {mode !== "forgot" && (
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="password"
+              className="font-mono-data text-[10px] font-medium uppercase tracking-widest text-[var(--muted)]"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete={
+                mode === "sign_in" ? "current-password" : "new-password"
+              }
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="rounded-[var(--r-sm)] border border-[var(--border)] bg-[var(--bg)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--dim)] focus:border-[var(--yellow-border)]"
+              placeholder="••••••••"
+            />
+          </div>
+        )}
 
         {message && (
           <p
@@ -196,7 +245,13 @@ export function LoginForm() {
           disabled={loading}
           className="mt-2 flex h-11 items-center justify-center rounded-[var(--r-sm)] bg-[var(--yellow)] text-sm font-semibold text-[var(--bg)] transition-opacity disabled:opacity-50"
         >
-          {loading ? "Please wait…" : mode === "sign_in" ? "Sign in" : "Sign up"}
+          {loading
+            ? "Please wait…"
+            : mode === "sign_in"
+              ? "Sign in"
+              : mode === "sign_up"
+                ? "Sign up"
+                : "Send reset link"}
         </button>
       </form>
     </div>

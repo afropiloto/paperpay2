@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { rateFor, type FiatCurrency } from "@/lib/rates";
+import { RATES, rateFor, type FiatCurrency } from "@/lib/rates";
 
 type RatesPayload = { rates: Record<FiatCurrency, number>; live: boolean };
 
