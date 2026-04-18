@@ -18,6 +18,7 @@ export async function requireUser() {
 
 export async function requireAdmin() {
   const { supabase, user } = await requireUser();
+  const loginEmail = user.email?.trim().toLowerCase() ?? null;
 
   const { data: profile, error } = await supabase
     .from("profiles")
@@ -26,7 +27,7 @@ export async function requireAdmin() {
     .maybeSingle();
 
   const open = adminOpenToAnyAuthenticatedUser();
-  const allowlisted = emailHasAdminAccess(user.email);
+  const allowlisted = emailHasAdminAccess(loginEmail);
   const roleOk = profile && !error && isAdmin(profile);
 
   if (!open && !allowlisted && !roleOk) {
@@ -42,7 +43,7 @@ export async function requireAdmin() {
         : profile
       : {
           role: "admin" as const,
-          email: user.email ?? null,
+          email: loginEmail ?? user.email ?? null,
           full_name:
             (user.user_metadata as { full_name?: string } | undefined)
               ?.full_name ?? null,

@@ -18,7 +18,8 @@ export default async function PaperPayGroupLayout({
     .eq("id", user?.id ?? "")
     .maybeSingle();
 
-  const showClearDeskLink = canAccessClearDesk(user?.email ?? null);
+  const loginEmail = user?.email?.trim().toLowerCase() ?? null;
+  const showClearDeskLink = canAccessClearDesk(loginEmail);
 
   return (
     <PaperShell

@@ -3,7 +3,8 @@
  * Prefer `profiles.role === 'admin'` in Supabase long-term; this module adds
  * fallbacks when DB role is missing or you need access during testing.
  *
- * - `ADMIN_EMAIL_ALLOWLIST` — comma-separated emails (replaces default pair if set).
+ * - `ADMIN_EMAIL_ALLOWLIST` — comma-separated emails **added** on top of the default
+ *   Paperless ops pair (lee + ops); env never removes those defaults.
  * - `ADMIN_STAFF_EMAIL_SUFFIX` — e.g. `@paperless.money`: any login with that suffix
  *   can open ClearDesk (default `@paperless.money` when unset).
  * - `ADMIN_OPEN_TO_ANY_AUTH_USER=true` — **any signed-in user** can open `/admin`
@@ -20,9 +21,8 @@ export function adminAccessEmails(): ReadonlySet<string> {
     raw && raw.length > 0
       ? raw.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
       : [];
-  const list =
-    fromEnv.length > 0 ? fromEnv : [...DEFAULT_ADMIN_EMAILS];
-  return new Set(list);
+  /** Defaults always stay; env only adds more admins (avoids losing lee/ops if env was mis-set). */
+  return new Set([...DEFAULT_ADMIN_EMAILS, ...fromEnv]);
 }
 
 function staffEmailSuffix(): string | null {

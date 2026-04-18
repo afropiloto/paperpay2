@@ -76,7 +76,8 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && (pathname === "/admin" || pathname.startsWith("/admin/"))) {
-    if (canAccessClearDesk(user.email)) {
+    const loginEmail = user.email?.trim().toLowerCase() ?? null;
+    if (canAccessClearDesk(loginEmail)) {
       return response;
     }
 
