@@ -2,10 +2,33 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import clsx from "clsx";
-import { BANK_DETAILS_GBP } from "@/lib/bank-details";
+import {
+  DEPOSIT_BANK_EU_IBAN,
+  DEPOSIT_BANK_UK_GBP,
+  type DepositBankRailId,
+} from "@/lib/bank-details";
 import { ensureDepositIntent, simulateDepositAction } from "./actions";
 
 type Currency = "GBP" | "EUR" | "USD";
+
+function DetailRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="bdr flex justify-between border-b border-[var(--border)] py-1.5 last:border-b-0">
+      <span className="bdk font-mono-data text-[11px] text-[var(--muted)]">
+        {label}
+      </span>
+      <span className="bdv max-w-[62%] text-right font-mono-data text-xs font-semibold text-[var(--text)] break-all">
+        {value}
+      </span>
+    </div>
+  );
+}
 
 export function DepositClient({
   simulateEnabled,
@@ -13,6 +36,7 @@ export function DepositClient({
   simulateEnabled: boolean;
 }) {
   const [currency, setCurrency] = useState<Currency>("GBP");
+  const [bankRail, setBankRail] = useState<DepositBankRailId>("uk");
   const [reference, setReference] = useState<string | null>(null);
   const [open, setOpen] = useState(true);
   const [pending, startTransition] = useTransition();
@@ -31,53 +55,36 @@ export function DepositClient({
     });
   }, [currency]);
 
-  const bankRows = useMemo(() => {
-    if (currency !== "GBP") return null;
+  const bankPanel = useMemo(() => {
+    if (bankRail === "uk") {
+      const b = DEPOSIT_BANK_UK_GBP;
+      return (
+        <div className="bank-details rounded-[var(--r-sm)] border border-[var(--border)] bg-[var(--surface2)] px-4 py-3.5">
+          <DetailRow label="Account name" value={b.accountName} />
+          <DetailRow label="Sort code" value={b.sortCode} />
+          <DetailRow label="Account number" value={b.accountNumber} />
+          <DetailRow label="IBAN" value={b.iban} />
+          <DetailRow label="SWIFT/BIC" value={b.bic} />
+          <DetailRow label="Currency (letter)" value={b.currencyLine} />
+          <DetailRow label="Your reference" value={reference ?? "—"} />
+        </div>
+      );
+    }
+
+    const b = DEPOSIT_BANK_EU_IBAN;
     return (
       <div className="bank-details rounded-[var(--r-sm)] border border-[var(--border)] bg-[var(--surface2)] px-4 py-3.5">
-        <div className="bdr flex justify-between border-b border-[var(--border)] py-1.5 last:border-b-0">
-          <span className="bdk font-mono-data text-[11px] text-[var(--muted)]">
-            Account name
-          </span>
-          <span className="bdv font-mono-data text-xs font-semibold text-[var(--text)]">
-            {BANK_DETAILS_GBP.accountName}
-          </span>
-        </div>
-        <div className="bdr flex justify-between border-b border-[var(--border)] py-1.5 last:border-b-0">
-          <span className="bdk font-mono-data text-[11px] text-[var(--muted)]">
-            Sort code
-          </span>
-          <span className="bdv font-mono-data text-xs font-semibold text-[var(--text)]">
-            {BANK_DETAILS_GBP.sortCode}
-          </span>
-        </div>
-        <div className="bdr flex justify-between border-b border-[var(--border)] py-1.5 last:border-b-0">
-          <span className="bdk font-mono-data text-[11px] text-[var(--muted)]">
-            Account no.
-          </span>
-          <span className="bdv font-mono-data text-xs font-semibold text-[var(--text)]">
-            {BANK_DETAILS_GBP.accountNumber}
-          </span>
-        </div>
-        <div className="bdr flex justify-between border-b border-[var(--border)] py-1.5 last:border-b-0">
-          <span className="bdk font-mono-data text-[11px] text-[var(--muted)]">
-            Bank
-          </span>
-          <span className="bdv font-mono-data text-xs font-semibold text-[var(--text)]">
-            {BANK_DETAILS_GBP.bankName}
-          </span>
-        </div>
-        <div className="bdr flex justify-between py-1.5">
-          <span className="bdk font-mono-data text-[11px] text-[var(--muted)]">
-            Reference
-          </span>
-          <span className="bdv font-mono-data text-xs font-semibold text-[var(--yellow)]">
-            {reference ?? "—"}
-          </span>
-        </div>
+        <DetailRow label="Account name" value={b.accountName} />
+        <DetailRow label="Bank name" value={b.bankName} />
+        <DetailRow label="Bank address" value={b.bankAddress} />
+        <DetailRow label="IBAN" value={b.iban} />
+        <DetailRow label="SWIFT/BIC" value={b.bic} />
+        <DetailRow label="Account number" value={b.accountNumber} />
+        <DetailRow label="Currency (letter)" value={b.currencyLine} />
+        <DetailRow label="Your reference" value={reference ?? "—"} />
       </div>
     );
-  }, [currency, reference]);
+  }, [bankRail, reference]);
 
   async function copyRef() {
     if (!reference) return;
@@ -115,7 +122,7 @@ export function DepositClient({
             Deposit
           </div>
           <div className="page-date mt-1 font-mono-data text-[11px] text-[var(--muted)]">
-            Unique reference + PaperPay bank details
+            Your reference plus the two Clearing accounts on file
           </div>
         </div>
         <button
@@ -133,10 +140,14 @@ export function DepositClient({
             Deposit funds
           </div>
           <div className="modal-sub mb-5 mt-1 text-[13px] text-[var(--muted)]">
-            Choose your currency and send to your PaperPay account
+            Choose the currency for your PaperPay reference, then pay into the UK
+            or European/international account below.
           </div>
 
-          <div className="mb-4 flex gap-2">
+          <div className="mb-2 font-mono-data text-[10px] font-medium uppercase tracking-wide text-[var(--muted)]">
+            Deposit currency (your reference)
+          </div>
+          <div className="mb-5 flex gap-2">
             {(["GBP", "EUR", "USD"] as const).map((c) => (
               <button
                 key={c}
@@ -152,6 +163,43 @@ export function DepositClient({
                 {c === "GBP" ? "🇬🇧 GBP" : c === "EUR" ? "🇪🇺 EUR" : "🇺🇸 USD"}
               </button>
             ))}
+          </div>
+
+          <div className="mb-2 font-mono-data text-[10px] font-medium uppercase tracking-wide text-[var(--muted)]">
+            Beneficiary bank
+          </div>
+          <div className="mb-5 grid gap-2 md:grid-cols-2">
+            <button
+              type="button"
+              className={clsx(
+                "rounded-[var(--r-sm)] border px-3 py-3 text-left text-sm font-semibold transition-colors",
+                bankRail === "uk"
+                  ? "border-[var(--yellow-border)] bg-[var(--yellow-dim)] text-[var(--yellow)]"
+                  : "border-[var(--border2)] bg-[var(--surface2)] text-[var(--text)]",
+              )}
+              onClick={() => setBankRail("uk")}
+            >
+              <div>{DEPOSIT_BANK_UK_GBP.title}</div>
+              <div className="mt-1 font-mono-data text-[11px] font-normal text-[var(--muted)]">
+                Sort code {DEPOSIT_BANK_UK_GBP.sortCode} · Account{" "}
+                {DEPOSIT_BANK_UK_GBP.accountNumber}
+              </div>
+            </button>
+            <button
+              type="button"
+              className={clsx(
+                "rounded-[var(--r-sm)] border px-3 py-3 text-left text-sm font-semibold transition-colors",
+                bankRail === "eu"
+                  ? "border-[var(--yellow-border)] bg-[var(--yellow-dim)] text-[var(--yellow)]"
+                  : "border-[var(--border2)] bg-[var(--surface2)] text-[var(--text)]",
+              )}
+              onClick={() => setBankRail("eu")}
+            >
+              <div>{DEPOSIT_BANK_EU_IBAN.title}</div>
+              <div className="mt-1 font-mono-data text-[11px] font-normal text-[var(--muted)]">
+                {DEPOSIT_BANK_EU_IBAN.bankName} · IBAN {DEPOSIT_BANK_EU_IBAN.iban}
+              </div>
+            </button>
           </div>
 
           {reference ? (
@@ -178,19 +226,24 @@ export function DepositClient({
             </div>
           )}
 
-          {currency === "GBP" ? (
-            bankRows
-          ) : (
-            <div className="mb-3.5 rounded-[var(--r-sm)] border border-[var(--border)] bg-[var(--surface2)] px-4 py-3 text-sm text-[var(--muted)]">
-              GBP bank details are shown in the UI reference. For {currency}, use the
-              same payment reference and follow the transfer instructions provided by
-              PaperPay ops for that rail.
+          {bankPanel}
+
+          {currency === "EUR" && bankRail === "uk" ? (
+            <div className="mt-3 rounded-[var(--r-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 font-mono-data text-[11px] text-[var(--muted)]">
+              EUR is not listed on the UK GBP letter. Prefer the{" "}
+              <strong className="text-[var(--text)]">European IBAN</strong> account
+              for euro rails, or confirm with your bank.
             </div>
-          )}
+          ) : null}
 
           <div className="mt-3 font-mono-data text-[11px] text-[var(--muted)]">
             ⚠ Always include your reference. Funds without a reference cannot be
             matched to your account.
+          </div>
+
+          <div className="mt-3 font-mono-data text-[10px] leading-relaxed text-[var(--dim)]">
+            Relationship manager: Josh Milner. General: support@clearing.com. Time
+            critical: payments@clearing.com. Tel: +44 (0) 20 8154 3174.
           </div>
 
           {simulateEnabled ? (
