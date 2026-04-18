@@ -9,6 +9,14 @@ function getResend(): Resend {
 
 const FROM = "pay@paperpay.money";
 
+function adminEmailRecipients(): string[] {
+  const raw = process.env.ADMIN_EMAIL ?? "";
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 export async function sendDepositConfirmedEmail(input: {
   to: string;
   name: string;
@@ -91,7 +99,7 @@ Log in to ClearDesk: ${appUrl}/admin`;
 <p>Log in to ClearDesk: <a href="${escapeHtml(appUrl + "/admin")}">${escapeHtml(appUrl + "/admin")}</a></p>`;
 
   const recipients = [
-    process.env.ADMIN_EMAIL,
+    ...adminEmailRecipients(),
     process.env.CLEARING_EMAIL,
   ].filter(Boolean) as string[];
 
