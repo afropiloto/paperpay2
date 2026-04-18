@@ -1,26 +1,91 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  Design tokens from /ui/paperpay-dashboard.html and /ui/cleardesk-dashboard.html.
+  Headings/UI fonts: Syne (PaperPay), DM Sans (ClearDesk). Numbers/data: DM Mono (both).
+*/
+
+html[data-theme="paperpay"] {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #181818;
+  --border: rgba(255, 255, 255, 0.08);
+  --border2: rgba(255, 255, 255, 0.14);
+  --text: #f0f0f0;
+  --muted: #666;
+  --dim: #333;
+  --yellow: #d4ff00;
+  --yellow-dim: rgba(212, 255, 0, 0.1);
+  --yellow-border: rgba(212, 255, 0, 0.25);
+  --green: #22c55e;
+  --green-bg: rgba(34, 197, 94, 0.09);
+  --red: #ef4444;
+  --red-bg: rgba(239, 68, 68, 0.09);
+  --blue: #3b82f6;
+  --blue-bg: rgba(59, 130, 246, 0.09);
+  --font: var(--font-syne), "Syne", sans-serif;
+  --mono: var(--font-dm-mono), "DM Mono", monospace;
+  --r: 14px;
+  --r-sm: 8px;
+}
+
+html[data-theme="cleardesk"] {
+  --bg: #0b0e14;
+  --surface: #111520;
+  --surface2: #171c2a;
+  --border: rgba(255, 255, 255, 0.07);
+  --border2: rgba(255, 255, 255, 0.12);
+  --text: #e8ecf4;
+  --muted: #7b85a0;
+  --dim: #424a60;
+  --blue: #3b82f6;
+  --blue-bg: rgba(59, 130, 246, 0.12);
+  --blue-border: rgba(59, 130, 246, 0.3);
+  --green: #22c55e;
+  --green-bg: rgba(34, 197, 94, 0.1);
+  --green-border: rgba(34, 197, 94, 0.25);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245, 158, 11, 0.1);
+  --amber-border: rgba(245, 158, 11, 0.28);
+  --red: #ef4444;
+  --red-bg: rgba(239, 68, 68, 0.1);
+  --red-border: rgba(239, 68, 68, 0.25);
+  --purple: #a78bfa;
+  --purple-bg: rgba(167, 139, 250, 0.1);
+  --font: var(--font-dm-sans), "DM Sans", sans-serif;
+  --mono: var(--font-dm-mono), "DM Mono", monospace;
+  --r: 10px;
+  --r-sm: 6px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font);
+  --font-mono: var(--mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface2: var(--surface2);
+  --color-border: var(--border);
+  --color-border2: var(--border2);
+  --color-foreground: var(--text);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-yellow: var(--yellow);
+  --color-green: var(--green);
+  --color-red: var(--red);
+  --color-blue: var(--blue);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.font-mono-data {
+  font-family: var(--mono);
 }

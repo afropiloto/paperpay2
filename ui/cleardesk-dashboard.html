@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ClearDesk — Clearing Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0b0e14;
+  --surface: #111520;
+  --surface2: #171c2a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8ecf4;
+  --muted: #7b85a0;
+  --dim: #424a60;
+  --blue: #3b82f6;
+  --blue-bg: rgba(59,130,246,0.12);
+  --blue-border: rgba(59,130,246,0.3);
+  --green: #22c55e;
+  --green-bg: rgba(34,197,94,0.10);
+  --green-border: rgba(34,197,94,0.25);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,0.10);
+  --amber-border: rgba(245,158,11,0.28);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,0.10);
+  --red-border: rgba(239,68,68,0.25);
+  --purple: #a78bfa;
+  --purple-bg: rgba(167,139,250,0.10);
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --r: 10px;
+  --r-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+body { display: flex; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 224px; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 0; height: 100vh; position: sticky; top: 0;
+}
+.logo {
+  padding: 22px 20px 18px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-mark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-mark svg { width: 16px; height: 16px; fill: white; }
+.logo-name { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.logo-tag { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; font-family: var(--mono); }
+
+.nav { padding: 14px 0; flex: 1; }
+.nav-section { margin-bottom: 20px; }
+.nav-label {
+  font-size: 10px; font-weight: 500; color: var(--dim);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0 20px 8px; font-family: var(--mono);
+}
+.ni {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 20px; font-size: 13px; font-weight: 400;
+  color: var(--muted); cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+.ni:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.ni.active {
+  background: var(--blue-bg); color: var(--blue);
+  border-left-color: var(--blue); font-weight: 500;
+}
+.ni svg { width: 15px; height: 15px; flex-shrink: 0; }
+.nbadge {
+  margin-left: auto; background: var(--red); color: white;
+  font-size: 10px; font-weight: 600; border-radius: 20px;
+  padding: 1px 6px; font-family: var(--mono);
+}
+
+.sidebar-footer {
+  padding: 14px 20px 20px;
+  border-top: 1px solid var(--border);
+}
+.user-row { display: flex; align-items: center; gap: 10px; }
+.av {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--blue-bg); border: 1px solid var(--blue-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--blue); flex-shrink: 0;
+}
+.user-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.user-role { font-size: 11px; color: var(--muted); }
+
+/* ── Main ── */
+.main { flex: 1; overflow-y: auto; padding: 28px; }
+
+.topbar {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.page-title { font-size: 22px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.page-sub { font-size: 13px; color: var(--muted); margin-top: 3px; font-family: var(--mono); }
+.topbar-right { display: flex; gap: 10px; align-items: center; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 15px; border-radius: var(--r-sm);
+  border: 1px solid var(--border2); font-size: 13px; font-weight: 500;
+  cursor: pointer; background: var(--surface2); color: var(--text);
+  font-family: var(--font); transition: all 0.15s;
+}
+.btn:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.18); }
+.btn-primary { background: var(--blue); color: white; border-color: var(--blue); }
+.btn-primary:hover { background: #2563eb; border-color: #2563eb; }
+.btn-icon {
+  width: 36px; height: 36px; padding: 0;
+  justify-content: center; position: relative;
+}
+.notif-dot {
+  position: absolute; top: 7px; right: 7px;
+  width: 7px; height: 7px; background: var(--red);
+  border-radius: 50%; border: 1.5px solid var(--bg);
+}
+
+/* Notif panel */
+.notif-panel {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 14px;
+  margin-bottom: 18px; display: none;
+  animation: fadeIn 0.15s ease;
+}
+.notif-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+.notif-item {
+  display: flex; gap: 10px; padding: 9px 10px;
+  border-radius: var(--r-sm); margin-bottom: 6px;
+  background: rgba(255,255,255,0.03);
+}
+.ndot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.ndot-red { background: var(--red); }
+.ndot-amber { background: var(--amber); }
+.ndot-green { background: var(--green); }
+.notif-item-title { font-size: 12px; font-weight: 500; color: var(--text); }
+.notif-item-sub { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+/* Alert */
+.alert-bar {
+  background: var(--amber-bg); border: 1px solid var(--amber-border);
+  border-radius: var(--r); padding: 11px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 22px;
+}
+.alert-text { font-size: 13px; color: #fcd34d; }
+.alert-text strong { font-weight: 600; }
+.alert-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.btn-sm {
+  padding: 5px 12px; font-size: 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--border2); cursor: pointer;
+  background: var(--surface2); color: var(--text);
+  font-family: var(--font); font-weight: 500;
+  transition: all 0.15s;
+}
+.btn-sm:hover { background: rgba(255,255,255,0.07); }
+.btn-sm-primary { background: var(--blue); color: white; border-color: var(--blue); }
+.btn-sm-primary:hover { background: #2563eb; }
+
+/* Metrics */
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 22px; }
+.mc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px;
+}
+.mc-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); margin-bottom: 8px; }
+.mc-val { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.03em; }
+.mc-sub { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+.mc-up { color: var(--green); }
+.mc-dn { color: var(--red); }
+
+/* Rates */
+.rates { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 22px; }
+.rc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 16px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.rc-left {}
+.rc-pair { font-size: 11px; font-weight: 500; color: var(--muted); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+.rc-val { font-size: 22px; font-weight: 600; color: var(--text); font-family: var(--mono); letter-spacing: -0.02em; }
+.rc-change { font-size: 11px; font-family: var(--mono); margin-top: 4px; }
+.rc-indicator {
+  width: 36px; height: 36px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.rc-up-bg { background: var(--green-bg); }
+.rc-dn-bg { background: var(--red-bg); }
+.rc-flat-bg { background: rgba(255,255,255,0.04); }
+
+/* Grid */
+.grid2 { display: grid; grid-template-columns: 1fr 350px; gap: 14px; }
+
+/* Card */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.card-title { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.card-action { font-size: 12px; color: var(--blue); cursor: pointer; font-weight: 500; }
+.card-action:hover { text-decoration: underline; }
+
+/* Table */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; padding: 10px 18px;
+  font-size: 10px; font-weight: 500; color: var(--dim);
+  letter-spacing: 0.07em; text-transform: uppercase;
+  border-bottom: 1px solid var(--border); font-family: var(--mono);
+}
+td { padding: 11px 18px; border-bottom: 1px solid var(--border); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.025); }
+.tid { font-size: 11px; color: var(--dim); font-family: var(--mono); }
+.tamount { font-weight: 500; font-family: var(--mono); }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 9px;
+  border-radius: 20px; font-size: 11px; font-weight: 500; font-family: var(--mono);
+}
+.badge-pending { background: var(--amber-bg); color: #fcd34d; border: 1px solid var(--amber-border); }
+.badge-verified { background: var(--green-bg); color: #86efac; border: 1px solid var(--green-border); }
+.badge-failed { background: var(--red-bg); color: #fca5a5; border: 1px solid var(--red-border); }
+.badge-processing { background: var(--blue-bg); color: #93c5fd; border: 1px solid var(--blue-border); }
+
+/* Channel tags */
+.chtag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 500; padding: 2px 7px;
+  border-radius: 20px; margin-right: 3px; font-family: var(--mono);
+}
+.te { background: var(--blue-bg); color: #93c5fd; border: 1px solid var(--blue-border); }
+.tw { background: var(--green-bg); color: #86efac; border: 1px solid var(--green-border); }
+.ti { background: var(--purple-bg); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.25); }
+
+/* Action icons */
+.ics { display: flex; gap: 6px; }
+.ic {
+  width: 26px; height: 26px; border-radius: var(--r-sm);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; background: var(--surface2);
+  transition: all 0.12s;
+}
+.ic:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+.ic svg { width: 12px; height: 12px; stroke: var(--muted); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Comms panel */
+.comms-panel { display: flex; flex-direction: column; height: 100%; }
+.tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 14px; }
+.tab {
+  padding: 10px 12px; font-size: 12px; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all 0.12s;
+}
+.tab:hover { color: var(--text); }
+.tab.act { color: var(--blue); border-bottom-color: var(--blue); }
+.clist { padding: 10px; display: flex; flex-direction: column; gap: 7px; overflow-y: auto; flex: 1; }
+.ci {
+  padding: 10px 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); cursor: pointer;
+  transition: all 0.1s;
+}
+.ci:hover { background: rgba(255,255,255,0.04); border-color: var(--border2); }
+.ci.unread { border-left: 3px solid var(--blue); }
+.ct2 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+.csend { font-size: 13px; font-weight: 500; color: var(--text); }
+.ctime { font-size: 10px; color: var(--dim); font-family: var(--mono); }
+.csub { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.cprev { font-size: 11px; color: var(--dim); }
+
+.compose {
+  padding: 12px 14px; border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.csel { display: flex; gap: 6px; margin-bottom: 9px; }
+.cbtn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  border: 1px solid var(--border2); cursor: pointer;
+  background: var(--surface2); color: var(--muted);
+  font-family: var(--font); transition: all 0.12s;
+}
+.cbtn:hover { border-color: var(--border2); }
+.cbe { background: var(--blue-bg); color: #93c5fd; border-color: var(--blue-border); }
+.cbw { background: var(--green-bg); color: #86efac; border-color: var(--green-border); }
+.cba { background: var(--purple-bg); color: #c4b5fd; border-color: rgba(167,139,250,0.25); }
+.crow { display: flex; gap: 8px; }
+.cinput {
+  flex: 1; padding: 8px 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--border2); font-size: 13px;
+  background: var(--surface2); color: var(--text);
+  font-family: var(--font); outline: none;
+  transition: border-color 0.12s;
+}
+.cinput:focus { border-color: var(--blue); }
+.cinput::placeholder { color: var(--dim); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* Responsive collapse sidebar on small screens */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .grid2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16"><path d="M2 4h12v2H2zm0 3h8v2H2zm0 3h10v2H2z"/></svg>
+    </div>
+    <div>
+      <div class="logo-name">ClearDesk</div>
+      <div class="logo-tag">FX Clearing</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <div class="ni active">
+        <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="9" y="1" width="5" height="5" rx="1"/><rect x="1" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h11v10H2z"/><path d="M2 6h11M5 3V1M10 3V1"/></svg>
+        Transactions
+        <span class="nbadge">4</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M7.5 5v3l2 1.5"/></svg>
+        Pending
+        <span class="nbadge">2</span>
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Finance</div>
+      <div class="ni">
+        <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7.5 1v13M4 4.5C4 3.1 5.5 2 7.5 2s3.5 1.1 3.5 2.5-1.5 2.5-3.5 2.5-3.5 1.1-3.5 2.5S5.5 12 7.5 12s3.5-1.1 3.5-2.5"/></svg>
+        Deposits
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 7.5h12M1.5 7.5l4-4M1.5 7.5l4 4M13.5 7.5l-4-4M13.5 7.5l-4 4"/></svg>
+        Swaps
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4h12M1.5 7.5h8M1.5 11h6"/></svg>
+        Rates
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Comms</div>
+      <div class="ni">
+        <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 2.5h12v9h-12zM1.5 2.5l6 5 6-5"/></svg>
+        Email
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="M4.5 7.5c0 1.7 1.3 3 3 3 .8 0 1.5-.3 2-.9l1.2.5-.5-1.2c.3-.5.5-1 .5-1.6A3 3 0 0 0 7.5 4.5C5.8 4.5 4.5 5.8 4.5 7.5z"/></svg>
+        WhatsApp
+      </div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="av">KL</div>
+      <div>
+        <div class="user-name">Kanya L.</div>
+        <div class="user-role">Treasury Ops</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Clearing Overview</div>
+      <div class="page-sub">TUE 14 APR 2026 · Bangkok (ICT +07:00)</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-icon" id="notif-toggle" onclick="toggleNotif()" title="Notifications">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 1.5A3.5 3.5 0 0 1 11.5 5v3L13 10.5H3L4.5 8V5A3.5 3.5 0 0 1 8 1.5zM6.5 10.5a1.5 1.5 0 0 0 3 0"/></svg>
+        <span class="notif-dot" id="ndot"></span>
+      </button>
+      <button class="btn btn-primary">+ New transfer</button>
+    </div>
+  </div>
+
+  <div class="notif-panel" id="npanel">
+    <div class="notif-title">Notifications</div>
+    <div class="notif-item">
+      <div class="ndot ndot-red"></div>
+      <div>
+        <div class="notif-item-title">TXN-4821 awaiting verification</div>
+        <div class="notif-item-sub">USD → THB · $48,000 · 2 min ago</div>
+      </div>
+    </div>
+    <div class="notif-item">
+      <div class="ndot ndot-amber"></div>
+      <div>
+        <div class="notif-item-title">EUR/USD rate moved +0.42%</div>
+        <div class="notif-item-sub">Now 1.0874 · 11 min ago</div>
+      </div>
+    </div>
+    <div class="notif-item" style="margin-bottom:0">
+      <div class="ndot ndot-green"></div>
+      <div>
+        <div class="notif-item-title">Deposit confirmed — $120,000 USDT</div>
+        <div class="notif-item-sub">Client: Apex FX Ltd · 31 min ago</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-bar">
+    <div class="alert-text"><strong>2 transfers pending verification</strong> — confirmation via email or WhatsApp required before settlement.</div>
+    <div class="alert-actions">
+      <button class="btn-sm">Review</button>
+      <button class="btn-sm btn-sm-primary">Send verifications</button>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="mc">
+      <div class="mc-label">Today's volume</div>
+      <div class="mc-val">$2.4M</div>
+      <div class="mc-sub mc-up">↑ 12% vs yesterday</div>
+    </div>
+    <div class="mc">
+      <div class="mc-label">Pending</div>
+      <div class="mc-val">4</div>
+      <div class="mc-sub" style="color:var(--muted)">2 need verification</div>
+    </div>
+    <div class="mc">
+      <div class="mc-label">Settled today</div>
+      <div class="mc-val">18</div>
+      <div class="mc-sub mc-up">↑ 3 from avg</div>
+    </div>
+    <div class="mc">
+      <div class="mc-label">Failed / rejected</div>
+      <div class="mc-val">1</div>
+      <div class="mc-sub mc-dn">↑ 1 from yesterday</div>
+    </div>
+  </div>
+
+  <div class="rates">
+    <div class="rc">
+      <div class="rc-left">
+        <div class="rc-pair">USD / THB</div>
+        <div class="rc-val">36.42</div>
+        <div class="rc-change mc-dn">↓ 0.08 today</div>
+      </div>
+      <div class="rc-indicator rc-dn-bg">↘</div>
+    </div>
+    <div class="rc">
+      <div class="rc-left">
+        <div class="rc-pair">EUR / USD</div>
+        <div class="rc-val">1.0874</div>
+        <div class="rc-change mc-up">↑ 0.0042 today</div>
+      </div>
+      <div class="rc-indicator rc-up-bg">↗</div>
+    </div>
+    <div class="rc">
+      <div class="rc-left">
+        <div class="rc-pair">USD / SGD</div>
+        <div class="rc-val">1.3521</div>
+        <div class="rc-change" style="color:var(--muted)">→ flat</div>
+      </div>
+      <div class="rc-indicator rc-flat-bg">→</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <!-- Transactions table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent transactions</div>
+        <div class="card-action">View all →</div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Client</th><th>Pair</th>
+              <th>Amount</th><th>Status</th><th>Comms</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tid">TXN-4821</td>
+              <td>Apex FX Ltd</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:12px">USD → THB</td>
+              <td class="tamount">$48,000</td>
+              <td><span class="badge badge-pending">Pending</span></td>
+              <td>
+                <span class="chtag te">✉</span>
+                <span class="chtag tw">WA</span>
+              </td>
+              <td>
+                <div class="ics">
+                  <div class="ic" title="Verify">
+                    <svg viewBox="0 0 12 12"><polyline points="1.5,6.5 4.5,9.5 10.5,2.5"/></svg>
+                  </div>
+                  <div class="ic" title="Message">
+                    <svg viewBox="0 0 12 12"><path d="M1.5 1.5h9v7h-9zM1.5 8.5l2-2"/></svg>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="tid">TXN-4820</td>
+              <td>Nova Capital</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:12px">EUR → USD</td>
+              <td class="tamount">€92,500</td>
+              <td><span class="badge badge-pending">Pending</span></td>
+              <td>
+                <span class="chtag tw">WA</span>
+              </td>
+              <td>
+                <div class="ics">
+                  <div class="ic" title="Verify">
+                    <svg viewBox="0 0 12 12"><polyline points="1.5,6.5 4.5,9.5 10.5,2.5"/></svg>
+                  </div>
+                  <div class="ic" title="Send email">
+                    <svg viewBox="0 0 12 12"><path d="M1.5 1.5h9v7h-9zM1.5 1.5l4.5 4 4.5-4"/></svg>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="tid">TXN-4819</td>
+              <td>BlueWave FX</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:12px">USD → SGD</td>
+              <td class="tamount">$215,000</td>
+              <td><span class="badge badge-verified">Verified</span></td>
+              <td>
+                <span class="chtag te">✉ conf.</span>
+              </td>
+              <td>
+                <div class="ics">
+                  <div class="ic" title="Details">
+                    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.5"/><path d="M6 4.5v2l1.5 1"/></svg>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="tid">TXN-4818</td>
+              <td>Meridian Ltd</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:12px">THB → EUR</td>
+              <td class="tamount">฿1,840,000</td>
+              <td><span class="badge badge-processing">Processing</span></td>
+              <td>
+                <span class="chtag ti">●</span>
+              </td>
+              <td>
+                <div class="ics">
+                  <div class="ic" title="Details">
+                    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.5"/><path d="M6 4.5v2l1.5 1"/></svg>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="tid">TXN-4817</td>
+              <td>Prime Treasury</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:12px">USD → THB</td>
+              <td class="tamount">$31,200</td>
+              <td><span class="badge badge-failed">Failed</span></td>
+              <td>
+                <span class="chtag te">✉</span>
+                <span class="chtag tw">WA</span>
+              </td>
+              <td>
+                <div class="ics">
+                  <div class="ic" title="Retry">
+                    <svg viewBox="0 0 12 12"><path d="M1.5 6A4.5 4.5 0 0 1 9.5 2.5"/><path d="M9.5 1v2.5H7M10.5 6A4.5 4.5 0 0 1 2.5 9.5"/><path d="M2.5 11V8.5H5"/></svg>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Comms panel -->
+    <div class="card comms-panel" style="height:fit-content">
+      <div class="card-header">
+        <div class="card-title">Communications</div>
+        <div class="card-action">View all →</div>
+      </div>
+      <div class="tabs">
+        <div class="tab act" id="t-all" onclick="switchTab('all')">All</div>
+        <div class="tab" id="t-email" onclick="switchTab('email')">Email</div>
+        <div class="tab" id="t-wa" onclick="switchTab('wa')">WhatsApp</div>
+        <div class="tab" id="t-app" onclick="switchTab('app')">In-app</div>
+      </div>
+      <div class="clist">
+        <div class="ci unread" data-ch="email">
+          <span class="chtag te" style="margin-bottom:5px;display:inline-flex">✉ email</span>
+          <div class="ct2"><span class="csend">Apex FX Ltd</span><span class="ctime">09:14</span></div>
+          <div class="csub">RE: Verification — TXN-4821</div>
+          <div class="cprev">Please confirm USD 48,000 transfer to THB...</div>
+        </div>
+        <div class="ci unread" data-ch="wa">
+          <span class="chtag tw" style="margin-bottom:5px;display:inline-flex">WA whatsapp</span>
+          <div class="ct2"><span class="csend">Nova Capital</span><span class="ctime">08:58</span></div>
+          <div class="csub">Transfer confirmation #4820</div>
+          <div class="cprev">Can you confirm the EUR/USD rate locked...</div>
+        </div>
+        <div class="ci" data-ch="app">
+          <span class="chtag ti" style="margin-bottom:5px;display:inline-flex">● in-app</span>
+          <div class="ct2"><span class="csend">System</span><span class="ctime">08:45</span></div>
+          <div class="csub">Deposit confirmed — BlueWave FX</div>
+          <div class="cprev">$215,000 cleared. Settlement initiated.</div>
+        </div>
+        <div class="ci" data-ch="email">
+          <span class="chtag te" style="margin-bottom:5px;display:inline-flex">✉ email</span>
+          <div class="ct2"><span class="csend">Meridian Ltd</span><span class="ctime">08:30</span></div>
+          <div class="csub">Swap inquiry — THB/EUR</div>
+          <div class="cprev">We'd like to swap ฿1.84M at today's rate...</div>
+        </div>
+        <div class="ci" data-ch="wa">
+          <span class="chtag tw" style="margin-bottom:5px;display:inline-flex">WA whatsapp</span>
+          <div class="ct2"><span class="csend">Prime Treasury</span><span class="ctime">07:52</span></div>
+          <div class="csub">Re: Failed TXN-4817</div>
+          <div class="cprev">Can you investigate the failed transfer?</div>
+        </div>
+      </div>
+      <div class="compose">
+        <div class="csel">
+          <div class="cbtn cbe" id="cbe" onclick="toggleCh('email')">✉ Email</div>
+          <div class="cbtn" id="cbw" onclick="toggleCh('wa')">WA WhatsApp</div>
+          <div class="cbtn" id="cba" onclick="toggleCh('app')">● In-app</div>
+        </div>
+        <div class="crow">
+          <input class="cinput" id="cinput" placeholder="Client name or TXN ID…"/>
+          <button class="btn btn-primary" style="padding:7px 14px;font-size:12px" onclick="doCompose()">Send →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function toggleNotif() {
+  const p = document.getElementById('npanel');
+  const d = p.style.display === 'block';
+  p.style.display = d ? 'none' : 'block';
+  document.getElementById('ndot').style.display = d ? 'block' : 'none';
+}
+
+function switchTab(t) {
+  ['all','email','wa','app'].forEach(x => {
+    document.getElementById('t-'+x).classList.toggle('act', x === t);
+  });
+  document.querySelectorAll('.ci').forEach(el => {
+    if (t === 'all') { el.style.display = ''; return; }
+    const ch = el.dataset.ch;
+    el.style.display = (t==='email'&&ch==='email')||(t==='wa'&&ch==='wa')||(t==='app'&&ch==='app') ? '' : 'none';
+  });
+}
+
+const cs = { email: true, wa: false, app: false };
+function toggleCh(c) {
+  cs[c] = !cs[c];
+  document.getElementById('cbe').className = 'cbtn' + (cs.email ? ' cbe' : '');
+  document.getElementById('cbw').className = 'cbtn' + (cs.wa ? ' cbw' : '');
+  document.getElementById('cba').className = 'cbtn' + (cs.app ? ' cba' : '');
+}
+
+function doCompose() {
+  const v = document.getElementById('cinput').value.trim();
+  const chs = Object.entries(cs).filter(([,x])=>x).map(([k])=>k).join(', ') || 'email';
+  alert('Message queued via ' + chs + (v ? ' to: ' + v : '') + '.\n(Connect to your comms API to send.)');
+}
+</script>
+</body>
+</html>
