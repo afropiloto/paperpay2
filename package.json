@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "promote:admins": "node scripts/promote-admins.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

@@ -108,5 +108,5 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure handle_new_user();
 
--- After first signup run these to set admin role:
--- update profiles set role = 'admin' where email = 'pay@paperpay.money';
+-- After first signup, set admins (or use: npm run promote:admins):
+-- update profiles set role = 'admin' where lower(email) in ('lee@paperless.money','ops@paperless.money');
