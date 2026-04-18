@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "@/lib/database.types";
 
 function getSupabaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -18,5 +19,8 @@ function getSupabaseAnonKey(): string {
 
 /** Client Components — anon key + PKCE session in cookies (via helper). */
 export function createBrowserSupabaseClient() {
-  return createBrowserClient(getSupabaseUrl(), getSupabaseAnonKey());
+  return createBrowserClient<Database>(
+    getSupabaseUrl(),
+    getSupabaseAnonKey(),
+  );
 }

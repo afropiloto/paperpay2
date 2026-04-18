@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import type { Database } from "@/lib/database.types";
 
 function getSupabaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,7 +23,7 @@ function getSupabaseAnonKey(): string {
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
-  return createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+  return createServerClient<Database>(getSupabaseUrl(), getSupabaseAnonKey(), {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -41,12 +42,12 @@ export async function createServerSupabaseClient() {
 }
 
 /** Route Handlers / privileged server code — bypasses RLS. */
-export function createServiceRoleSupabaseClient(): SupabaseClient {
+export function createServiceRoleSupabaseClient(): SupabaseClient<Database> {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
     throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
   }
-  return createClient(getSupabaseUrl(), serviceRoleKey, {
+  return createClient<Database>(getSupabaseUrl(), serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

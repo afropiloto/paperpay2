@@ -7,6 +7,7 @@ const PROTECTED_PREFIXES = [
   "/swap",
   "/deposit",
   "/history",
+  "/account",
 ] as const;
 
 function isProtectedPath(pathname: string): boolean {
@@ -71,6 +72,24 @@ export async function middleware(request: NextRequest) {
       redirectResponse.cookies.set(cookie.name, cookie.value);
     });
     return redirectResponse;
+  }
+
+  if (user && (pathname === "/admin" || pathname.startsWith("/admin/"))) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "admin") {
+      const redirectResponse = NextResponse.redirect(
+        new URL("/dashboard", request.url),
+      );
+      response.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value);
+      });
+      return redirectResponse;
+    }
   }
 
   return response;
