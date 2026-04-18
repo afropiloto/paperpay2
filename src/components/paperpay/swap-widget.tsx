@@ -1,9 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { RATES, rateFor, type FiatCurrency } from "@/lib/rates";
 
 export function SwapWidget() {
+  const router = useRouter();
   const [mode, setMode] = useState<"instant" | "locked">("instant");
   const [sendAmount, setSendAmount] = useState("");
   const [currency, setCurrency] = useState<FiatCurrency>("GBP");
@@ -64,12 +66,17 @@ export function SwapWidget() {
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setMessage(body?.error ?? "Request failed");
+        const err =
+          typeof body?.error === "string"
+            ? body.error
+            : `Request failed (${res.status})`;
+        setMessage(err);
         return;
       }
       setMessage(`Swap requested. Reference: ${body.payment_reference}`);
       setSendAmount("");
       setWallet("");
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -189,7 +196,15 @@ export function SwapWidget() {
         </div>
 
         {message ? (
-          <p className="mb-3 text-center text-xs text-[var(--muted)]">{message}</p>
+          <p
+            className={`mb-3 rounded-[var(--r-sm)] border px-3 py-2 text-center text-xs leading-relaxed ${
+              message.startsWith("Swap requested")
+                ? "border-[var(--green)]/30 bg-[var(--green-bg)] text-[var(--text)]"
+                : "border-[var(--red)]/30 bg-[var(--red-bg)] text-[var(--text)]"
+            }`}
+          >
+            {message}
+          </p>
         ) : null}
 
         <button

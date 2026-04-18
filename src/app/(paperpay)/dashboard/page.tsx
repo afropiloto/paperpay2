@@ -99,6 +99,10 @@ export default async function DashboardPage() {
         <div className="balance-label mb-2.5 font-mono-data text-xs font-medium uppercase tracking-[0.07em] text-[var(--muted)]">
           Total balance (GBP equiv.)
         </div>
+        <p className="mb-2 font-mono-data text-[10px] text-[var(--dim)]">
+          Figures load from your Supabase balances — not the static HTML mock. Empty
+          or £0.00 until you deposit or receive USDT.
+        </p>
         <div className="balance-amount text-5xl font-bold leading-none tracking-tight text-[var(--text)]">
           £
           <span className="text-[var(--yellow)]">{gbpIntWithCommas}</span>.{gbpDec}
@@ -118,21 +122,30 @@ export default async function DashboardPage() {
           >
             Deposit
           </Link>
-          <button
-            type="button"
-            className="bal-btn bal-btn-secondary inline-flex cursor-not-allowed items-center gap-2 rounded-[var(--r-sm)] border border-[var(--border2)] bg-[var(--surface2)] px-[18px] py-2.5 text-[13px] font-semibold text-[var(--text)] opacity-50"
-            disabled
-            title="Off-ramp is V2"
+          <div
+            className="bal-btn bal-btn-secondary inline-flex cursor-default flex-col items-start justify-center gap-0.5 rounded-[var(--r-sm)] border border-dashed border-[var(--border2)] bg-[var(--surface2)] px-[18px] py-2.5 text-[13px] font-semibold text-[var(--muted)]"
+            title="Fiat off-ramp is not in V1"
           >
-            Withdraw
-          </button>
+            <span>Withdraw</span>
+            <span className="font-mono-data text-[10px] font-normal normal-case text-[var(--dim)]">
+              V2 — not built yet
+            </span>
+          </div>
           <Link
             href="/swap"
-            className="bal-btn bal-btn-secondary inline-flex items-center gap-2 rounded-[var(--r-sm)] border border-[var(--border2)] bg-[var(--surface2)] px-[18px] py-2.5 text-[13px] font-semibold text-[var(--text)]"
+            className="bal-btn bal-btn-secondary inline-flex items-center gap-2 rounded-[var(--r-sm)] border border-[var(--border2)] bg-[var(--surface2)] px-[18px] py-2.5 text-[13px] font-semibold text-[var(--text)] hover:border-[var(--yellow-border)]"
           >
             Swap
           </Link>
         </div>
+        <p className="mt-3 max-w-xl font-mono-data text-[11px] leading-relaxed text-[var(--muted)]">
+          <strong className="text-[var(--text)]">Deposit</strong> opens bank details + your
+          reference.           <strong className="text-[var(--text)]">Swap</strong> opens the request form; if
+          the server is missing the PaperPay USDT wallet env var, submit will show an
+          error.{" "}
+          <strong className="text-[var(--text)]">Withdraw</strong> is intentionally off in
+          V1 (spec: off-ramp V2).
+        </p>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
