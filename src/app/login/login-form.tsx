@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase-browser";
@@ -65,7 +66,17 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-sm rounded-[var(--r)] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset]">
-      <div className="mb-8">
+      <div className="mb-8 flex flex-col items-center text-center">
+        <div className="mb-5 flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--bg)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+          <Image
+            src="/paperpay-logo.png"
+            alt="PaperPay"
+            width={72}
+            height={72}
+            className="h-[72px] w-[72px] object-contain"
+            priority
+          />
+        </div>
         <h1 className="text-xl font-semibold tracking-tight text-[var(--text)]">
           Paper<span className="text-[var(--yellow)]">Pay</span>
         </h1>

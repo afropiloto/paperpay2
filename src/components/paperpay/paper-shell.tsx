@@ -41,13 +41,13 @@ export function PaperShell({
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-[240px_1fr]">
       <aside className="sticky top-0 hidden h-screen flex-col border-r border-[var(--border)] bg-[var(--surface)] md:flex">
         <div className="flex items-center gap-2.5 border-b border-[var(--border)] px-[22px] pb-5 pt-6">
-          <div className="flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-[10px] bg-[var(--yellow)]">
+          <div className="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-[var(--border)] bg-[var(--bg)]">
             <Image
               src="/paperpay-logo.png"
               alt="PaperPay"
               width={34}
               height={34}
-              className="h-[34px] w-[34px] object-cover"
+              className="h-[34px] w-[34px] object-contain"
             />
           </div>
           <div>
