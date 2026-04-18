@@ -39,13 +39,22 @@ export async function POST(request: Request) {
 
   if (createErr) {
     const msg = createErr.message.toLowerCase();
+    const code = String(
+      (createErr as { code?: string }).code ?? "",
+    ).toLowerCase();
     if (
+      code === "email_exists" ||
       msg.includes("already") ||
       msg.includes("registered") ||
+      msg.includes("exists") ||
+      msg.includes("duplicate") ||
       createErr.status === 422
     ) {
       return NextResponse.json(
-        { error: "An account with this email already exists. Sign in instead." },
+        {
+          error:
+            "An account with this email already exists. Use Sign in, or Forgot password if you lost access.",
+        },
         { status: 409 },
       );
     }
@@ -72,8 +81,11 @@ export async function POST(request: Request) {
   );
 
   if (profErr) {
+    await admin.auth.admin.deleteUser(uid);
     return NextResponse.json(
-      { error: `Profile setup failed: ${profErr.message}` },
+      {
+        error: `Profile setup failed (${profErr.message}). Ensure the Supabase \`profiles\` table exists (see docs/schema.sql), then try sign up again.`,
+      },
       { status: 500 },
     );
   }

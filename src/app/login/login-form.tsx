@@ -25,12 +25,14 @@ export function LoginForm() {
     setMessage(null);
     setLoading(true);
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     try {
       if (mode === "forgot") {
         const res = await fetch("/api/auth/send-recovery", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ email: normalizedEmail }),
         });
         const body = (await res.json().catch(() => ({}))) as {
           error?: string;
@@ -48,7 +50,7 @@ export function LoginForm() {
 
       if (mode === "sign_in") {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: normalizedEmail,
           password,
         });
         if (error) {
@@ -64,9 +66,9 @@ export function LoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          email: normalizedEmail,
           password,
-          full_name: fullName,
+          full_name: fullName.trim(),
         }),
       });
       const body = (await res.json().catch(() => ({}))) as { error?: string };
@@ -76,7 +78,7 @@ export function LoginForm() {
       }
 
       const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email,
+        email: normalizedEmail,
         password,
       });
       if (signInErr) {
@@ -265,7 +267,7 @@ export function LoginForm() {
         {mode === "sign_in"
           ? "Sign-in does not send email — only your password is checked."
           : mode === "sign_up"
-            ? "New accounts are created immediately (no confirmation email). You are signed in right after sign up."
+            ? "New accounts are created immediately. Email is normalized to lowercase (OPS@… becomes ops@…)."
             : "Password reset links are sent by email through Resend. Check spam if you do not see it within a minute."}
       </p>
     </div>
