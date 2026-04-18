@@ -111,7 +111,32 @@ export function PaperShell({
         </div>
       </aside>
 
-      <main className="max-w-[900px] overflow-y-auto px-5 py-8 md:px-9 md:py-8">
+      <main className="min-w-0 max-w-[900px] flex-1 overflow-y-auto px-5 py-8 md:px-9 md:py-8">
+        <nav
+          aria-label="PaperPay sections"
+          className="mb-6 flex gap-2 overflow-x-auto border-b border-[var(--border)] pb-3 md:hidden"
+        >
+          {nav.map((item) => {
+            const active =
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={clsx(
+                  "whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold",
+                  active
+                    ? "border-[var(--yellow-border)] bg-[var(--yellow-dim)] text-[var(--yellow)]"
+                    : "border-[var(--border2)] bg-[var(--surface2)] text-[var(--muted)]",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
         {children}
       </main>
     </div>
