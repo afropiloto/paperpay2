@@ -20,8 +20,6 @@ export function LoginForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage(null);
@@ -29,23 +27,21 @@ export function LoginForm() {
 
     try {
       if (mode === "forgot") {
-        const base = appUrl?.replace(/\/$/, "") ?? "";
-        if (!base) {
-          setMessage(
-            "Password reset is not configured (NEXT_PUBLIC_APP_URL missing).",
-          );
-          return;
-        }
-        const redirectTo = `${base}/auth/callback?next=${encodeURIComponent("/auth/update-password")}`;
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo,
+        const res = await fetch("/api/auth/send-recovery", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
         });
-        if (error) {
-          setMessage(error.message);
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          message?: string;
+        };
+        if (!res.ok) {
+          setMessage(body?.error ?? "Could not send reset email.");
           return;
         }
         setMessage(
-          "Check your email for a reset link. Open it on this device; the link expires after a while.",
+          "Check your email for a reset link (sent via Resend). Open it on this device; the link expires after a while.",
         );
         return;
       }
@@ -64,23 +60,34 @@ export function LoginForm() {
         return;
       }
 
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName },
-          emailRedirectTo: appUrl
-            ? `${appUrl.replace(/\/$/, "")}/auth/callback?next=${encodeURIComponent(nextPath)}`
-            : undefined,
-        },
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          full_name: fullName,
+        }),
       });
-      if (error) {
-        setMessage(error.message);
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setMessage(body?.error ?? "Could not create account.");
         return;
       }
-      setMessage(
-        "Check your email to confirm your account, then sign in here.",
-      );
+
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInErr) {
+        setMessage(
+          "Account created. Sign in with your password (email confirmation is not required).",
+        );
+        setMode("sign_in");
+        return;
+      }
+      router.replace(nextPath);
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -256,10 +263,10 @@ export function LoginForm() {
       </form>
       <p className="mt-4 text-center font-mono-data text-[10px] leading-relaxed text-[var(--dim)]">
         {mode === "sign_in"
-          ? "Sign-in does not send email — only your password is checked in Supabase."
+          ? "Sign-in does not send email — only your password is checked."
           : mode === "sign_up"
-            ? "Confirmation emails are sent by Supabase Auth (not PaperPay’s Resend swap mail). In Supabase: Authentication → Emails → SMTP, add e.g. Resend SMTP so messages are delivered."
-            : "Reset links are also sent by Supabase Auth. Check spam; fix SMTP in the Supabase dashboard if nothing arrives."}
+            ? "New accounts are created immediately (no confirmation email). You are signed in right after sign up."
+            : "Password reset links are sent by email through Resend. Check spam if you do not see it within a minute."}
       </p>
     </div>
   );

@@ -156,6 +156,30 @@ On-chain hash: ${escapeHtml(input.outgoingHash)}</p>
   );
 }
 
+/** Password reset link from Supabase Admin `generateLink` — delivered via Resend (not Supabase SMTP). */
+export async function sendPasswordResetViaResend(input: {
+  to: string;
+  actionLink: string;
+}) {
+  const subject = "Reset your PaperPay password";
+  const text = `Reset your password by opening this link (one-time use; expires soon):
+
+${input.actionLink}
+
+If you did not request this, you can ignore this email.`;
+  const html = `<p>Reset your password using the link below (one-time use; expires soon).</p>
+<p><a href="${escapeHtml(input.actionLink)}">Set new password</a></p>
+<p style="color:#666;font-size:12px">If you did not request this, you can ignore this email.</p>`;
+
+  await getResend().emails.send({
+    from: FROM,
+    to: input.to,
+    subject,
+    text,
+    html,
+  });
+}
+
 function escapeHtml(s: string): string {
   return s
     .replaceAll("&", "&amp;")
