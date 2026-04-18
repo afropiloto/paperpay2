@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { canAccessClearDesk } from "@/lib/admin-access";
 import { PaperShell } from "@/components/paperpay/paper-shell";
 
 export default async function PaperPayGroupLayout({
@@ -17,8 +18,11 @@ export default async function PaperPayGroupLayout({
     .eq("id", user?.id ?? "")
     .maybeSingle();
 
+  const showClearDeskLink = canAccessClearDesk(user?.email ?? null);
+
   return (
     <PaperShell
+      showClearDeskLink={showClearDeskLink}
       profile={{
         full_name: profile?.full_name ?? null,
         email: profile?.email ?? null,

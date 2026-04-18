@@ -30,9 +30,12 @@ function initials(profile: Profile): string {
 
 export function PaperShell({
   profile,
+  showClearDeskLink = false,
   children,
 }: {
   profile: Profile;
+  /** Show ClearDesk (/admin) in nav when middleware would allow this user. */
+  showClearDeskLink?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -81,6 +84,22 @@ export function PaperShell({
               </Link>
             );
           })}
+          {showClearDeskLink ? (
+            <Link
+              href="/admin"
+              className={clsx(
+                "mt-1 flex items-center gap-2.5 px-[22px] py-2.5 text-sm font-medium transition-colors",
+                pathname === "/admin" || pathname.startsWith("/admin/")
+                  ? "bg-[var(--yellow-dim)] text-[var(--yellow)]"
+                  : "text-[var(--muted)] hover:bg-white/[0.03] hover:text-[var(--text)]",
+              )}
+            >
+              <span className="font-mono-data text-xs">ClearDesk</span>
+              <span className="rounded border border-[var(--border2)] px-1 font-mono-data text-[9px] text-[var(--dim)]">
+                admin
+              </span>
+            </Link>
+          ) : null}
         </nav>
 
         <div className="border-t border-[var(--border)] px-[22px] pb-[22px] pt-4">
@@ -136,6 +155,19 @@ export function PaperShell({
               </Link>
             );
           })}
+          {showClearDeskLink ? (
+            <Link
+              href="/admin"
+              className={clsx(
+                "whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold",
+                pathname === "/admin" || pathname.startsWith("/admin/")
+                  ? "border-[var(--yellow-border)] bg-[var(--yellow-dim)] text-[var(--yellow)]"
+                  : "border-[var(--border2)] bg-[var(--surface2)] text-[var(--muted)]",
+              )}
+            >
+              ClearDesk
+            </Link>
+          ) : null}
         </nav>
         {children}
       </main>

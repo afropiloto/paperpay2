@@ -1,5 +1,8 @@
 import { createServerSupabaseClient, createServiceRoleSupabaseClient } from "@/lib/supabase-server";
-import { emailHasAdminAccess } from "@/lib/admin-access";
+import {
+  adminOpenToAnyAuthenticatedUser,
+  emailHasAdminAccess,
+} from "@/lib/admin-access";
 import { isAdmin } from "@/lib/roles";
 
 export async function requireUser() {
@@ -22,16 +25,19 @@ export async function requireAdmin() {
     .eq("id", user.id)
     .maybeSingle();
 
+  const open = adminOpenToAnyAuthenticatedUser();
   const allowlisted = emailHasAdminAccess(user.email);
   const roleOk = profile && !error && isAdmin(profile);
 
-  if (!allowlisted && !roleOk) {
+  if (!open && !allowlisted && !roleOk) {
     throw new Error("Forbidden");
   }
 
+  const treatAsAdmin = open || allowlisted;
+
   const profileOut =
     profile && !error
-      ? allowlisted && profile.role !== "admin"
+      ? treatAsAdmin && profile.role !== "admin"
         ? { ...profile, role: "admin" as const }
         : profile
       : {
