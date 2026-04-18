@@ -254,6 +254,13 @@ export function LoginForm() {
                 : "Send reset link"}
         </button>
       </form>
+      <p className="mt-4 text-center font-mono-data text-[10px] leading-relaxed text-[var(--dim)]">
+        {mode === "sign_in"
+          ? "Sign-in does not send email — only your password is checked in Supabase."
+          : mode === "sign_up"
+            ? "Confirmation emails are sent by Supabase Auth (not PaperPay’s Resend swap mail). In Supabase: Authentication → Emails → SMTP, add e.g. Resend SMTP so messages are delivered."
+            : "Reset links are also sent by Supabase Auth. Check spam; fix SMTP in the Supabase dashboard if nothing arrives."}
+      </p>
     </div>
   );
 }
