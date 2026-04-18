@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse, type NextRequest } from "next/server";
+import { emailHasAdminAccess } from "@/lib/admin-access";
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -75,6 +76,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && (pathname === "/admin" || pathname.startsWith("/admin/"))) {
+    if (emailHasAdminAccess(user.email)) {
+      return response;
+    }
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")

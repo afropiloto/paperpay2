@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { RATES, rateFor, type FiatCurrency } from "@/lib/rates";
+import { rateFor, type FiatCurrency } from "@/lib/rates";
+
+type RatesPayload = { rates: Record<FiatCurrency, number>; live: boolean };
 
 export function SwapWidget() {
   const router = useRouter();
@@ -13,8 +15,38 @@ export function SwapWidget() {
   const [lockSeconds, setLockSeconds] = useState(300);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [liveRates, setLiveRates] = useState<RatesPayload | null>(null);
 
-  const rate = useMemo(() => rateFor(currency), [currency]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/rates", { cache: "no-store" });
+        const body = (await res.json()) as Partial<RatesPayload>;
+        if (
+          cancelled ||
+          !body?.rates ||
+          typeof body.rates.GBP !== "number"
+        ) {
+          return;
+        }
+        setLiveRates({
+          rates: body.rates as Record<FiatCurrency, number>,
+          live: Boolean(body.live),
+        });
+      } catch {
+        /* keep static fallback */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const rate = useMemo(
+    () => liveRates?.rates[currency] ?? rateFor(currency),
+    [currency, liveRates],
+  );
   const recv = useMemo(() => {
     const amt = Number.parseFloat(sendAmount);
     if (!Number.isFinite(amt) || amt <= 0) return "";
@@ -171,6 +203,11 @@ export function SwapWidget() {
           </span>
           <span className="rate-val font-mono-data text-[13px] font-semibold text-[var(--text)]">
             1 {currency} = {rate.toFixed(4)} USDT
+            {liveRates?.live ? (
+              <span className="ml-1.5 text-[10px] font-normal text-[var(--muted)]">
+                (live)
+              </span>
+            ) : null}
           </span>
           {mode === "locked" ? (
             <span className="rate-lock-timer font-mono-data text-[11px] text-[var(--yellow)]">

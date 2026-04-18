@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient, createServiceRoleSupabaseClient } from "@/lib/supabase-server";
+import { getUsdtPerUnit } from "@/lib/fx-rates";
 import { isFiatCurrency } from "@/lib/money";
-import { rateFor, type FiatCurrency } from "@/lib/rates";
+import type { FiatCurrency } from "@/lib/rates";
 import { nextSwapReference } from "@/lib/references";
 import { sendSwapRequestEmail } from "@/lib/resend";
 
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
   if (!wallet_address) {
     return NextResponse.json({ error: "Missing wallet" }, { status: 400 });
   }
-  const rate = rateFor(currency);
+  const rate = await getUsdtPerUnit(currency);
   const amountOut = (amount * rate).toFixed(2);
   const rateStr = rate.toFixed(4);
 

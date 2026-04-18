@@ -9,6 +9,16 @@ export type AdminTxnRow = Database["public"]["Tables"]["transactions"]["Row"] & 
   profiles?: { email: string | null; full_name: string | null } | null;
 };
 
+/** USDT (≈USD) per 1 unit of fiat — same source as `/api/swap` should use when wired to live FX. */
+export type AdminRatesSnapshot = {
+  gbp: string;
+  eur: string;
+  usd: string;
+  asOf: string | null;
+  live: boolean;
+  source: string;
+};
+
 function badge(status: string | null) {
   const s = status ?? "";
   if (s.includes("pending")) return "badge badge-pending";
@@ -22,9 +32,11 @@ function badge(status: string | null) {
 export function AdminDashboard({
   profileName,
   rows,
+  ratesSnapshot,
 }: {
   profileName: string;
   rows: AdminTxnRow[];
+  ratesSnapshot?: AdminRatesSnapshot | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -129,9 +141,44 @@ export function AdminDashboard({
               Clearing Overview
             </div>
             <div className="page-sub mt-1 font-mono-data text-[13px] text-[var(--muted)]">
-              Live data from Supabase
+              Clearing queue — same login as PaperPay (no separate admin password).
             </div>
           </div>
+        </div>
+
+        <div className="mb-6 grid gap-3 md:grid-cols-2">
+          <div className="rounded-[var(--r)] border border-[var(--border)] bg-[var(--surface2)] px-4 py-3.5">
+            <div className="mb-1 text-[12px] font-semibold text-[var(--text)]">
+              What this screen is
+            </div>
+            <p className="text-[12px] leading-relaxed text-[var(--muted)]">
+              Different theme and layout from PaperPay: transaction table, optional
+              status tweaks, and hash recording for swaps. Deposit confirmation in
+              the bank still needs a webhook or a dedicated “confirm deposit” flow if
+              you add one.
+            </p>
+          </div>
+          {ratesSnapshot ? (
+            <div className="rounded-[var(--r)] border border-[var(--border)] bg-[var(--surface2)] px-4 py-3.5">
+              <div className="mb-1 text-[12px] font-semibold text-[var(--text)]">
+                Reference FX (USDT per 1 unit)
+              </div>
+              <div className="font-mono-data text-[11px] text-[var(--text)]">
+                GBP {ratesSnapshot.gbp} · EUR {ratesSnapshot.eur} · USD{" "}
+                {ratesSnapshot.usd}
+              </div>
+              <div className="mt-1 font-mono-data text-[10px] text-[var(--dim)]">
+                {ratesSnapshot.live
+                  ? `Live (${ratesSnapshot.source}) · date ${ratesSnapshot.asOf ?? "—"}`
+                  : `Offline fallback (${ratesSnapshot.source})`}
+              </div>
+              <p className="mt-2 text-[11px] leading-relaxed text-[var(--muted)]">
+                There is no FX editor in ClearDesk yet; new swap requests use the same
+                live feed as this card (with static fallback if the feed fails). This
+                panel is read-only.
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <div className="metrics mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
